@@ -1,7 +1,7 @@
 from webflowpy import settings
 from webflowpy.WebflowResponse import WebflowResponse
 from webflowpy.utils import requests_retry_session
-from webflowpy import log as logg
+from webflowpy.log import logger
 
 from typing import Optional
 
@@ -41,7 +41,7 @@ class Webflow:
                 method, headers=self.headers, url=url, json=data
             )
         except Exception as x:
-            logg.error("No valid response after {retries} attempts. Aborting!".format(retries = settings.retries + 1))
+            logger.error("No valid response after {retries} attempts. Aborting!".format(retries = settings.retries + 1))
             if settings.abort_on_error:
                 exit(1)
         else:

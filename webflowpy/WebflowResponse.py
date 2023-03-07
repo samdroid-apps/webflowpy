@@ -1,18 +1,17 @@
 from requests import Response
 import json
+from typing import Union
 
 from urllib3.response import HTTPResponse
 
-from typing import Union
-
-from webflowpy import log as logg
+from webflowpy.log import logger
 
 error_codes = {
     'SyntaxError': 'Request body was incorrectly formatted. Likely invalid JSON being sent up.',
     'InvalidAPIVersion': 'Requested an invalid API version.',
     'UnsupportedVersion': 'Requested an API version that in unsupported by the requested route.',
     'NotImplemented': 'This feature is not currently implemented.',
-    'ValidationError': 'Validation failure (see response.problems with verbosity >= 3).',
+    'ValidationError': "Validation failure (see response with `logging.setLevel('debug')`)",
     'Conflict': 'Request has a conflict with existing data.',
     'Unauthorized': 'Provided access token is invalid or does not have access to requested resource.',
     'NotFound': 'Requested resource not found.',
@@ -46,19 +45,19 @@ class WebflowResponse():
             self.request_method = r.method
 
         if self.ok:
-            logg.status('{method} {url}: [{code}] {reason}'.format(
+            logger.info('{method} {url}: [{code}] {reason}'.format(
                 method = self.request_method, url = self.request_path_url,
                 code = self.status_code, reason = self.reason)
             )
-            logg.info('Response: ' + str(json.dumps(self.response, indent=4)))
+            logger.debug('Response: ' + str(json.dumps(self.response, indent=4)))
         else:
             if self.reason in error_codes:
                 desc = ' (' + error_codes[self.reason] + ')'
             else:
                 desc = ''
-            logg.error('{method} {url}: [{code}] - {reason}{desc}'.format(
+            logger.error('{method} {url}: [{code}] - {reason}{desc}'.format(
                 method = self.request_method, url = self.request_path_url,
                 code = self.status_code, reason = self.reason, desc = desc)
             )
-            logg.info('Response: ' + str(json.dumps(self.response, indent=4)))
+            logger.debug('Response: ' + str(json.dumps(self.response, indent=4)))
 

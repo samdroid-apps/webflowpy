@@ -3,7 +3,7 @@ from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
 from webflowpy import settings
-from webflowpy import log as logg
+from webflowpy.log import logger
 from webflowpy.WebflowResponse import WebflowResponse
 
 class CallbackRetry(Retry):
@@ -25,13 +25,13 @@ class CallbackRetry(Retry):
                 else:
                     next_try = settings.backoff_factor * (2 ^ (kwargs['_pool'].num_requests - 2))
 
-                logg.warn('Unsuccessful request, try {}/{}. Next try in {} seconds'.format(
+                logger.warn('Unsuccessful request, try {}/{}. Next try in {} seconds'.format(
                     kwargs['_pool'].num_requests, settings.retries+1, next_try
                 ))
                 self._callback(url, method, kwargs)
             except Exception as e:
                 print(e)
-                logg.warn('Callback raised an exception, ignoring')
+                logger.warn('Callback raised an exception, ignoring')
         return super(CallbackRetry, self).increment(method, url, *args, **kwargs)
 
 def retry_callback(url, method, kwargs):

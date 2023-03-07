@@ -13,31 +13,6 @@ except Exception:
         'Webflow': {}
     }
 
-if config.has_option('General', 'verbosity'):
-    verbosity = int(config['General']['verbosity'])
-else:
-    verbosity = 3
-"""Set global verbosity level.
-Level 0: only show 'error' messages. Default
-Level 1: also show 'warning' messages.
-Level 2: also show 'status' messages.
-Level 3: also show 'info' messages.
-etc.
-"""
-
-if config.has_option('General', 'cachedir'):
-    cachedir = config['General']['cachedir']
-else:
-    cachedir = './cache/'
-"""Default cache directory.
-"""
-
-if config.has_option('General', 'logfile'):
-    logfile = config['General']['logfile']
-else:
-    logfile = ''
-"""Name of logfile. By default is set to '' and writes to standard output."""
-
 if config.has_option('Webflow', 'token'):
     token = config['Webflow']['token']
 elif 'WEBFLOW_ACCESS_TOKEN' in os.environ:
@@ -64,26 +39,3 @@ if config.has_option('Webflow', 'backoff_factor'):
 else:
     backoff_factor = 20
 """{backoff factor} * (2 ^ ({number of total retries} - 1)) delay after unsuccessfull 500 or 429 requests"""
-
-def _set_start_time():
-    from time import time
-    return time()
-
-_start = _set_start_time()
-"""Time when the settings module is first imported."""
-
-_previous_time = _start
-"""Variable for timing program parts."""
-
-_previous_memory_usage = -1
-"""Stores the previous memory usage."""
-
-def _is_run_from_ipython():
-    """Determines whether run from Ipython.
-    Only affects progress bars.
-    """
-    try:
-        __IPYTHON__
-        return True
-    except NameError:
-        return False
