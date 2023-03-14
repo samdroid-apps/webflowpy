@@ -60,4 +60,3 @@ class WebflowResponse():
                 code = self.status_code, reason = self.reason, desc = desc)
             )
             logger.debug('Response: ' + str(json.dumps(self.response, indent=4)))
-

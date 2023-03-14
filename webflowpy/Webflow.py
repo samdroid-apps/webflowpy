@@ -3,7 +3,7 @@ from webflowpy.WebflowResponse import WebflowResponse
 from webflowpy.utils import requests_retry_session
 from webflowpy.log import logger
 
-from typing import Optional
+from typing import Any, Optional
 
 DEFAULT_ENDPOINT = 'https://api.webflow.com'
 VERSION = '1.0.0'
@@ -35,18 +35,11 @@ class Webflow:
             data: Optional[dict] = {}
     ):
         url = self.endpoint + path
-
-        try:
-            response = requests_retry_session().request(
-                method, headers=self.headers, url=url, json=data
-            )
-        except Exception as x:
-            logger.error("No valid response after {retries} attempts. Aborting!".format(retries = settings.retries + 1))
-            if settings.abort_on_error:
-                exit(1)
-        else:
-            resp_parsed = WebflowResponse(response)
-            return resp_parsed.response
+        response = requests_retry_session().request(
+            method, headers=self.headers, url=url, json=data
+        )
+        resp_parsed = WebflowResponse(response)
+        return resp_parsed.response
 
     # META
 
@@ -81,7 +74,7 @@ class Webflow:
 
     # ITEMS
 
-    def items(self, collection_id, limit = 100, offset = 0, all = False):
+    def items(self, collection_id, limit = 100, offset = 0, all = False) -> Any:
         if all:
             all_items = []
             resp = self.items(collection_id, offset=offset, all=False)
