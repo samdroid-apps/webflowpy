@@ -1,3 +1,3 @@
 import logging
 
-logger = logging.getLogger('webflowpy')
+logger = logging.getLogger("webflowpy")

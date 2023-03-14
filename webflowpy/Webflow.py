@@ -1,18 +1,16 @@
-from webflowpy import settings
-from webflowpy.WebflowResponse import WebflowResponse
-from webflowpy.utils import requests_retry_session
-from webflowpy.log import logger
-
 from typing import Any, Optional
 
-DEFAULT_ENDPOINT = 'https://api.webflow.com'
-VERSION = '1.0.0'
+from webflowpy import settings
+from webflowpy.log import logger
+from webflowpy.utils import requests_retry_session
+from webflowpy.WebflowResponse import WebflowResponse
+
+DEFAULT_ENDPOINT = "https://api.webflow.com"
+VERSION = "1.0.0"
+
 
 class Webflow:
-    def __init__(
-            self,
-            token: Optional[str] = None
-    ):
+    def __init__(self, token: Optional[str] = None):
         if token:
             self.token = token
         else:
@@ -22,18 +20,13 @@ class Webflow:
         self.version = VERSION
 
         self.headers = {
-            'Accept': 'application/json',
-            'Authorization': 'Bearer {token}'.format(token = self.token),
-            'accept-version': self.version,
-            'Content-Type': 'application/json',
+            "Accept": "application/json",
+            "Authorization": "Bearer {token}".format(token=self.token),
+            "accept-version": self.version,
+            "Content-Type": "application/json",
         }
 
-    def __query(
-            self,
-            method: str,
-            path: str,
-            data: Optional[dict] = {}
-    ):
+    def __query(self, method: str, path: str, data: Optional[dict] = {}):
         url = self.endpoint + path
         response = requests_retry_session().request(
             method, headers=self.headers, url=url, json=data
@@ -44,164 +37,219 @@ class Webflow:
     # META
 
     def info(self):
-        return self.__query('GET', '/info')
+        return self.__query("GET", "/info")
 
     # SITES
 
     def sites(self):
-        return self.__query('GET', '/sites')
+        return self.__query("GET", "/sites")
 
     def site(self, site_id):
-        return self.__query('GET', '/sites/{site_id}'.format(site_id = site_id))
+        return self.__query("GET", "/sites/{site_id}".format(site_id=site_id))
 
     def publishSite(self, site_id, domain_names):
         """Takes site_id->str and domain_names->list as arguments"""
         domains = {"domains": domain_names}
-        return self.__query('POST', '/sites/{site_id}/publish'.format(site_id = site_id), data=domains)
+        return self.__query(
+            "POST", "/sites/{site_id}/publish".format(site_id=site_id), data=domains
+        )
 
     # DOMAINS
 
     def domains(self, site_id):
-        return self.__query('GET', '/sites/{site_id}/domains'.format(site_id=site_id))
+        return self.__query("GET", "/sites/{site_id}/domains".format(site_id=site_id))
 
     # COLLECTIONS
 
     def collections(self, site_id):
-        return self.__query('GET', '/sites/{site_id}/collections'.format(site_id=site_id))
+        return self.__query(
+            "GET", "/sites/{site_id}/collections".format(site_id=site_id)
+        )
 
     def collection(self, collection_id):
-        return self.__query('GET', '/collections/{collection_id}'.format(collection_id=collection_id))
+        return self.__query(
+            "GET", "/collections/{collection_id}".format(collection_id=collection_id)
+        )
 
     # ITEMS
 
-    def items(self, collection_id, limit = 100, offset = 0, all = False) -> Any:
+    def items(self, collection_id, limit=100, offset=0, all=False) -> Any:
         if all:
             all_items = []
             resp = self.items(collection_id, offset=offset, all=False)
-            all_items.extend(resp['items'])
+            all_items.extend(resp["items"])
 
-            while(len(all_items) < resp['total']):
+            while len(all_items) < resp["total"]:
                 offset += 100
                 resp = self.items(collection_id, offset=offset, all=False)
-                all_items.extend(resp['items'])
+                all_items.extend(resp["items"])
 
-            resp['items'] = all_items
-            resp['count'] = len(all_items)
+            resp["items"] = all_items
+            resp["count"] = len(all_items)
 
             return resp
         else:
-            return self.__query('GET', '/collections/{collection_id}/items?limit={limit}&offset={offset}'.format(
-                collection_id=collection_id, limit = limit, offset = offset
-            ))
+            return self.__query(
+                "GET",
+                "/collections/{collection_id}/items?limit={limit}&offset={offset}".format(
+                    collection_id=collection_id, limit=limit, offset=offset
+                ),
+            )
 
     def item(self, collection_id, item_id):
-        return self.__query('GET', '/collections/{collection_id}/items/{item_id}'.format(
-            collection_id=collection_id, item_id = item_id
-        ))
+        return self.__query(
+            "GET",
+            "/collections/{collection_id}/items/{item_id}".format(
+                collection_id=collection_id, item_id=item_id
+            ),
+        )
 
-    def createItem(self, collection_id, item_data, live = False):
+    def createItem(self, collection_id, item_data, live=False):
         data = {}
-        data['fields'] = item_data
+        data["fields"] = item_data
 
-        l = '?live=true' if live else ''
+        l = "?live=true" if live else ""
 
-        return self.__query('POST', '/collections/{collection_id}/items{live}'.format(
-            collection_id=collection_id, live = l
-        ), data = data)
+        return self.__query(
+            "POST",
+            "/collections/{collection_id}/items{live}".format(
+                collection_id=collection_id, live=l
+            ),
+            data=data,
+        )
 
-    def updateItem(self, collection_id, item_id, item_data, live = False):
+    def updateItem(self, collection_id, item_id, item_data, live=False):
         data = {}
-        data['fields'] = item_data
+        data["fields"] = item_data
 
-        l = '?live=true' if live else ''
+        l = "?live=true" if live else ""
 
-        return self.__query('PUT', '/collections/{collection_id}/items/{item_id}{live}'.format(
-            collection_id=collection_id, item_id = item_id, live = l
-        ), data = data)
+        return self.__query(
+            "PUT",
+            "/collections/{collection_id}/items/{item_id}{live}".format(
+                collection_id=collection_id, item_id=item_id, live=l
+            ),
+            data=data,
+        )
 
-    def patchItem(self, collection_id, item_id, item_data, live = False):
+    def patchItem(self, collection_id, item_id, item_data, live=False):
         data = {}
-        data['fields'] = item_data
+        data["fields"] = item_data
 
-        l = '?live=true' if live else ''
+        l = "?live=true" if live else ""
 
-        return self.__query('PATCH', '/collections/{collection_id}/items/{item_id}{live}'.format(
-            collection_id=collection_id, item_id = item_id, live = l
-        ), data=data)
+        return self.__query(
+            "PATCH",
+            "/collections/{collection_id}/items/{item_id}{live}".format(
+                collection_id=collection_id, item_id=item_id, live=l
+            ),
+            data=data,
+        )
 
     def removeItem(self, collection_id, item_id):
-        return self.__query('DELETE', '/collections/{collection_id}/items/{item_id}'.format(
-            collection_id=collection_id, item_id = item_id
-        ))
+        return self.__query(
+            "DELETE",
+            "/collections/{collection_id}/items/{item_id}".format(
+                collection_id=collection_id, item_id=item_id
+            ),
+        )
 
     # ECOMMERCE
 
     def orders(self, site_id):
-        return self.__query('GET', '/sites/{site_id}/orders'.format(site_id=site_id))
+        return self.__query("GET", "/sites/{site_id}/orders".format(site_id=site_id))
 
     def order(self, site_id, order_id):
-        return self.__query('GET', '/sites/{site_id}/order/{order_id}'.format(site_id=site_id, order_id = order_id))
+        return self.__query(
+            "GET",
+            "/sites/{site_id}/order/{order_id}".format(
+                site_id=site_id, order_id=order_id
+            ),
+        )
 
     def updateOrder(self, site_id, order_id, order_data):
         data = {}
-        data['fields'] = order_data
+        data["fields"] = order_data
 
         return self.__query(
-            'PATCH', '/sites/{site_id}/order/{order_id}'.format(site_id=site_id, order_id=order_id),
-            data=data
+            "PATCH",
+            "/sites/{site_id}/order/{order_id}".format(
+                site_id=site_id, order_id=order_id
+            ),
+            data=data,
         )
 
     def fulfillOrder(self, site_id, order_id):
-        return self.__query('POST', '/sites/{site_id}/order/{order_id}/fulfill'.format(
-            site_id=site_id, order_id = order_id
-        ))
+        return self.__query(
+            "POST",
+            "/sites/{site_id}/order/{order_id}/fulfill".format(
+                site_id=site_id, order_id=order_id
+            ),
+        )
 
     def unfulfillOrder(self, site_id, order_id):
-        return self.__query('POST', '/sites/{site_id}/order/{order_id}/unfulfill'.format(
-            site_id=site_id, order_id = order_id
-        ))
+        return self.__query(
+            "POST",
+            "/sites/{site_id}/order/{order_id}/unfulfill".format(
+                site_id=site_id, order_id=order_id
+            ),
+        )
 
     def refundOrder(self, site_id, order_id):
-        return self.__query('POST', '/sites/{site_id}/order/{order_id}/refund'.format(
-            site_id=site_id, order_id = order_id
-        ))
+        return self.__query(
+            "POST",
+            "/sites/{site_id}/order/{order_id}/refund".format(
+                site_id=site_id, order_id=order_id
+            ),
+        )
 
     def itemInventory(self, collection_id, item_id):
-        return self.__query('GET', '/collections/{collection_id}/items/{item_id}/inventory'.format(
-            collection_id=collection_id, item_id=item_id
-        ))
+        return self.__query(
+            "GET",
+            "/collections/{collection_id}/items/{item_id}/inventory".format(
+                collection_id=collection_id, item_id=item_id
+            ),
+        )
 
     def updateItemInventory(self, collection_id, item_id, inventory_data):
         data = {}
-        data['fields'] = inventory_data
+        data["fields"] = inventory_data
 
-        return self.__query('PATCH', '/collections/{collection_id}/items/{item_id}/inventory'.format(
-            collection_id=collection_id, item_id=item_id
-        ), data=data)
-    
+        return self.__query(
+            "PATCH",
+            "/collections/{collection_id}/items/{item_id}/inventory".format(
+                collection_id=collection_id, item_id=item_id
+            ),
+            data=data,
+        )
+
     def products(self, site_id):
-        return self.__query('GET', '/sites/{site_id}/products'.format(site_id=site_id))
+        return self.__query("GET", "/sites/{site_id}/products".format(site_id=site_id))
 
     # WEBHOOKS
 
     def webhooks(self, site_id):
-        return self.__query('GET', '/sites/{site_id}/webhooks'.format(site_id=site_id))
+        return self.__query("GET", "/sites/{site_id}/webhooks".format(site_id=site_id))
 
     def webhook(self, site_id, webhook_id):
         return self.__query(
-            'GET', '/sites/{site_id}/webhooks/{webhook_id}'.format(site_id=site_id, webhook_id=webhook_id)
+            "GET",
+            "/sites/{site_id}/webhooks/{webhook_id}".format(
+                site_id=site_id, webhook_id=webhook_id
+            ),
         )
 
     def createWebhook(self, site_id, triggerType, url, filter):
-        data = {
-            'triggerType': triggerType,
-            'url': url,
-            'filter': filter
-        }
+        data = {"triggerType": triggerType, "url": url, "filter": filter}
 
-        return self.__query('POST', '/sites/{site_id}/webhooks'.format(site_id=site_id), data=data)
+        return self.__query(
+            "POST", "/sites/{site_id}/webhooks".format(site_id=site_id), data=data
+        )
 
     def removeWebhook(self, site_id, webhook_id):
         return self.__query(
-            'DELETE', '/sites/{site_id}/webhooks/{webhook_id}'.format(site_id=site_id, webhook_id=webhook_id)
+            "DELETE",
+            "/sites/{site_id}/webhooks/{webhook_id}".format(
+                site_id=site_id, webhook_id=webhook_id
+            ),
         )
