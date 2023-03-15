@@ -59,7 +59,7 @@ def requests_retry_session(
         callback=retry_callback,
         # Allow retrying dangerous methods (POST/PATCH) because the errors are
         # rate limits, so it is safe to retry.
-        allowed_methods={'GET', 'POST', 'PUT', 'PATCH', 'DELETE'},
+        allowed_methods={"GET", "POST", "PUT", "PATCH", "DELETE"},
     )
     adapter = HTTPAdapter(max_retries=retry)
     session.mount("http://", adapter)
