@@ -35,8 +35,7 @@ class CallbackRetry(Retry):
                 )
                 self._callback(url, method, kwargs)
             except Exception as e:
-                print(e)
-                logger.warn("Callback raised an exception, ignoring")
+                logger.warn(f"Callback raised an exception ({e!r}), ignoring")
         return super(CallbackRetry, self).increment(method, url, *args, **kwargs)
 
 
