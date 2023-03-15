@@ -25,7 +25,7 @@ class CallbackRetry(Retry):
                     next_try = 0
                 else:
                     next_try = settings.backoff_factor * (
-                        2 ^ (kwargs["_pool"].num_requests - 2)
+                        2 ** (kwargs["_pool"].num_requests - 2)
                     )
 
                 logger.warn(
@@ -48,17 +48,18 @@ def retry_callback(url, method, kwargs):
 def requests_retry_session(
     retries=settings.retries,
     backoff_factor=settings.backoff_factor,
-    status_forcelist=(500, 429, 400),
+    status_forcelist=(500, 429),
     session=None,
 ):
     session = session or requests.Session()
     retry = CallbackRetry(
         total=retries,
-        read=retries,
-        connect=retries,
         backoff_factor=backoff_factor,
         status_forcelist=status_forcelist,
         callback=retry_callback,
+        # Allow retrying dangerous methods (POST/PATCH) because the errors are
+        # rate limits, so it is safe to retry.
+        allowed_methods={'GET', 'POST', 'PUT', 'PATCH', 'DELETE'},
     )
     adapter = HTTPAdapter(max_retries=retry)
     session.mount("http://", adapter)

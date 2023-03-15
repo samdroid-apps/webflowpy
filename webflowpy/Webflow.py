@@ -31,6 +31,7 @@ class Webflow:
         response = requests_retry_session().request(
             method, headers=self.headers, url=url, json=data
         )
+        response.raise_for_status()
         resp_parsed = WebflowResponse(response)
         return resp_parsed.response
 
